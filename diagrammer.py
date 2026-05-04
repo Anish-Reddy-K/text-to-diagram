@@ -36,7 +36,13 @@ def render(spec):
             body.append(_database(node))
         elif node["type"] == "stack":
             body.append(_stack(node))
-    return _svg(width, height, body)
+        elif node["type"] == "note":
+            body.append(_note(node))
+        elif node["type"] == "custom":
+            body.append(_custom(node))
+        elif node["type"] in _registry:
+            body.append(_registry[node["type"]][0](node))
+    return _svg(width, height, body, spec.get("defs", ""))
 
 
 def _box(node):
@@ -60,6 +66,44 @@ def _text(node):
         f'dominant-baseline="middle" font-family="monospace" '
         f'font-size="14">{label}</text>'
     )
+
+
+def _custom(node):
+    x, y = node["x"], node["y"]
+    inner = node.get("svg", "")
+    wrapped = f'<g transform="translate({x},{y})">{inner}</g>'
+    label = node.get("label")
+    if not label:
+        return wrapped
+    cx, cy = _center(node)
+    text = (
+        f'<text x="{cx}" y="{cy}" text-anchor="middle" '
+        f'dominant-baseline="middle" font-family="monospace" '
+        f'font-size="14">{label}</text>'
+    )
+    return wrapped + text
+
+
+def _note(node):
+    x, y, w, h = node["x"], node["y"], node["w"], node["h"]
+    label = node.get("label", "")
+    cx, cy = x + w / 2, y + h / 2
+    fold = 12
+    style = 'fill="none" stroke="black" stroke-width="1.5"'
+    outline = (
+        f'<path d="M {x} {y} L {x + w - fold} {y} L {x + w} {y + fold} '
+        f'L {x + w} {y + h} L {x} {y + h} Z" {style}/>'
+    )
+    fold_tri = (
+        f'<path d="M {x + w - fold} {y} L {x + w - fold} {y + fold} '
+        f'L {x + w} {y + fold}" {style}/>'
+    )
+    text = (
+        f'<text x="{cx}" y="{cy}" text-anchor="middle" '
+        f'dominant-baseline="middle" font-family="monospace" '
+        f'font-size="13">{label}</text>'
+    )
+    return outline + fold_tri + text
 
 
 def _group(node):
@@ -273,6 +317,12 @@ COL_GAP = 80
 ROW_GAP = 30
 MARGIN = 40
 
+_registry = {}
+
+
+def register_component(name, render_fn, default_w=DEFAULT_W, default_h=DEFAULT_H):
+    _registry[name] = (render_fn, default_w, default_h)
+
 
 def _apply_defaults(nodes):
     for n in nodes:
@@ -291,6 +341,16 @@ def _apply_defaults(nodes):
         elif n["type"] == "stack":
             n.setdefault("w", DEFAULT_W)
             n.setdefault("h", DEFAULT_H)
+        elif n["type"] == "note":
+            n.setdefault("w", DEFAULT_W)
+            n.setdefault("h", DEFAULT_H)
+        elif n["type"] == "custom":
+            n.setdefault("w", DEFAULT_W)
+            n.setdefault("h", DEFAULT_H)
+        elif n["type"] in _registry:
+            _, dw, dh = _registry[n["type"]]
+            n.setdefault("w", dw)
+            n.setdefault("h", dh)
         else:
             n.setdefault("w", DEFAULT_W)
             n.setdefault("h", DEFAULT_H)
@@ -378,14 +438,15 @@ def _fit_height(nodes):
     return max((n["y"] + n["h"] for n in nodes), default=0) + MARGIN
 
 
-def _svg(width, height, body):
+def _svg(width, height, body, extra_defs=""):
     defs = (
         '<defs>'
         '<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" '
         'markerWidth="8" markerHeight="8" orient="auto-start-reverse">'
         '<path d="M 0 0 L 10 5 L 0 10 z" fill="black"/>'
         '</marker>'
-        '</defs>'
+        + extra_defs
+        + '</defs>'
     )
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" '

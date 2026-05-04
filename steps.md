@@ -5,7 +5,7 @@
 **What we're building.** A tiny tool that turns a JSON spec into a clean, blueprint-style SVG diagram. The target user is someone writing technical blog posts (neural nets, request flows, system architectures) who wants 3Blue1Brown-meets-Excalidraw output without opening a design tool. The spec is also designed to be easy for an LLM to write, so the primary workflow is: describe diagram in English → LLM emits JSON → tool emits SVG → drop SVG into post.
 
 **Design philosophy (non-negotiable).**
-- **One file, stdlib only, no dependencies** until a step explicitly adds one. Current core lives in `diagrammer.py` (~110 lines).
+- **One file, stdlib only, no dependencies** until a step explicitly adds one. Current core lives in `diagrammer.py` (~470 lines).
 - **Hand-rolled SVG as f-strings.** No D3, no React, no headless browser, no rendering libs. SVG is just text. Layout math is *the actual product* — don't hide it behind a dep.
 - **Small, fixed component set** that covers ~90% of AI/systems diagrams: box, circle, database, stack, group, note, text, arrow. Adding a new built-in component is trivial; an LLM can also define a one-off `custom` component inline (Phase 4) without touching the library.
 - **Surgical changes.** Every step touches only what it must. No speculative abstractions, no "flexibility" features, no error handling for impossible cases. If a step's diff has unrelated cleanup, the step is wrong.
@@ -13,7 +13,7 @@
 
 **Stack.** Python 3, stdlib only. No build step, no `pip install` (until packaging in Phase 9). Tests use `unittest` (stdlib). The three eventual distribution interfaces (Claude Skill, MCP server, interactive CLI) are all thin wrappers over a single function: `render(spec) -> svg_string`.
 
-**Current state.** Phase 0 (steps 1–5) is done. `diagrammer.py` exports `render(spec)`, supports `box` and `circle` node types, edges with arrowheads and type-aware border clipping, automatic left-to-right topological layout, and a CLI entry point that reads JSON from a file path or stdin. Manual `x`/`y` still works; if any node lacks them, the whole diagram is auto-laid-out. See `mlp.json` for a working example.
+**Current state.** Phases 0–4 (steps 1–20) are done. `diagrammer.py` exports `render(spec)` and `register_component(name, fn, default_w, default_h)`. Built-in node types: `box`, `circle`, `text`, `database`, `stack`, `group`, `note`, `custom`. Edges support labels (with auto-widened column gaps for breathing room), `style` (dashed/solid), `weight` (thin/thick), self-loops, and `router: "ortho"` for right-angle bends. Layout supports `direction` (LR/TB), per-spec `col_gap`/`row_gap`/`margin`, vertical centering of columns, and a 30%-from-source bend bias for ortho. Spec accepts a top-level `defs` string for shared SVG defs (gradients, custom markers, filters) referenced from `custom` nodes. Edges are drawn behind nodes so stacks visually emerge from behind their back layers. CLI reads JSON from a path or stdin. Working examples: `mlp.json`, `ortho.json`, `transformer.json`, `grouped.json`, `note.json`, `custom.json`, `defs.json`.
 
 **Working agreement.** Each step below is small enough to finish in one sitting and ends with a verifiable check. Don't skip ahead. Don't bundle. If a step takes more than ~30 min, it's too big — split it. After each step, the user runs the verify command and either says "pass" (move to next) or reports what's wrong (fix, then re-verify).
 
@@ -31,36 +31,36 @@
 
 ---
 
-## Phase 1 — Layout polish
+## Phase 1 — Layout polish (done)
 
-- [ ] **6.** Vertical-center each column. Verify: in the test4 MLP, circles align with the vertical midpoint of the boxes — no top-heavy clustering.
-- [ ] **7.** Add `direction` to spec (`"LR"` default, `"TB"` for top-to-bottom). Verify: same MLP rendered with `direction: "TB"` flows downward.
-- [ ] **8.** Add `gap` config (`col_gap`, `row_gap`, `margin`) overridable per spec. Verify: tighter and looser layouts of same diagram.
+- [x] **6.** Vertical-center each column. Verify: in the test4 MLP, circles align with the vertical midpoint of the boxes — no top-heavy clustering.
+- [x] **7.** Add `direction` to spec (`"LR"` default, `"TB"` for top-to-bottom). Verify: same MLP rendered with `direction: "TB"` flows downward.
+- [x] **8.** Add `gap` config (`col_gap`, `row_gap`, `margin`) overridable per spec. Verify: tighter and looser layouts of same diagram.
 
-## Phase 2 — Edge polish
+## Phase 2 — Edge polish (done)
 
-- [ ] **9.** Edge labels: `{"from", "to", "label"}` renders text on midpoint with a small white background rect. Verify: `a -> b "weights"` shows label without crossing the line.
-- [ ] **10.** Edge styles: `"style": "dashed" | "solid"`, `"weight": "thin" | "thick"`. Verify: visually distinct.
-- [ ] **11.** Self-loops: edge where `from == to` renders as a curved arrow back to the same node. Verify: a single-node spec with self-loop renders cleanly.
-- [ ] **12.** Orthogonal routing option: `"router": "ortho"` draws edges with right-angle bends instead of straight lines. Verify: top-to-bottom flow with ortho router has no diagonal lines.
+- [x] **9.** Edge labels: `{"from", "to", "label"}` renders text on midpoint with a small white background rect. Verify: `a -> b "weights"` shows label without crossing the line.
+- [x] **10.** Edge styles: `"style": "dashed" | "solid"`, `"weight": "thin" | "thick"`. Verify: visually distinct.
+- [x] **11.** Self-loops: edge where `from == to` renders as a curved arrow back to the same node. Verify: a single-node spec with self-loop renders cleanly.
+- [x] **12.** Orthogonal routing option: `"router": "ortho"` draws edges with right-angle bends instead of straight lines. Verify: top-to-bottom flow with ortho router has no diagonal lines.
 
-## Phase 3 — Core components
+## Phase 3 — Core components (done)
 
 Each: add type, renderer, default size, border-clip rule. One PR per component.
 
-- [ ] **13.** `text` — label-only node, no border. For annotations.
-- [ ] **14.** `database` — cylinder shape. Border clip approximated as box.
-- [ ] **15.** `stack` — layered rectangle (offset duplicates) for transformer blocks etc. Param: `count`.
-- [ ] **16.** `group` — rectangle that contains child nodes; children laid out inside its bounds. Param: `children: [nodeIds]`. Verify: a group around `h1, h2, h3` draws a labeled box around all three.
-- [ ] **17.** `note` — callout box with different stroke style for sidebar comments.
+- [x] **13.** `text` — label-only node, no border. For annotations.
+- [x] **14.** `database` — cylinder shape. Border clip approximated as box.
+- [x] **15.** `stack` — layered rectangle (offset duplicates) for transformer blocks etc. Param: `count`.
+- [x] **16.** `group` — rectangle that contains child nodes; children laid out inside its bounds. Param: `children: [nodeIds]`. Verify: a group around `h1, h2, h3` draws a labeled box around all three.
+- [x] **17.** `note` — callout box with different stroke style for sidebar comments.
 
-## Phase 4 — Custom components (LLM extensibility)
+## Phase 4 — Custom components (LLM extensibility) (done)
 
 The escape hatch when the core set isn't enough. The LLM writes SVG fragments inline; layout still works because `w`/`h` are declared.
 
-- [ ] **18.** `custom` type: `{"type": "custom", "svg": "<g>...</g>", "w": N, "h": M, "label": "..."}`. The fragment is anchored at `(0,0)` and the renderer wraps it in `<g transform="translate(x,y)">`. Border clipping uses `w`/`h` like a box. Verify: a hand-written triangle node renders in the right place with correct arrow termination.
-- [ ] **19.** `defs` block at spec level: `{"defs": "<marker.../>...", "nodes": [...]}` injects shared SVG defs (gradients, filters, custom markers). Verify: a custom arrowhead marker referenced from a `custom` node works.
-- [ ] **20.** Component registry (Python-only, not for LLM use): `register_component("foo", fn)` so the CLI can be extended in code. Verify: a user-written `foo` component renders without modifying `diagrammer.py`.
+- [x] **18.** `custom` type: `{"type": "custom", "svg": "<g>...</g>", "w": N, "h": M, "label": "..."}`. The fragment is anchored at `(0,0)` and the renderer wraps it in `<g transform="translate(x,y)">`. Border clipping uses `w`/`h` like a box. Verify: a hand-written triangle node renders in the right place with correct arrow termination.
+- [x] **19.** `defs` block at spec level: `{"defs": "<marker.../>...", "nodes": [...]}` injects shared SVG defs (gradients, filters, custom markers). Verify: a custom arrowhead marker referenced from a `custom` node works.
+- [x] **20.** Component registry (Python-only, not for LLM use): `register_component("foo", fn)` so the CLI can be extended in code. Verify: a user-written `foo` component renders without modifying `diagrammer.py`.
 
 ## Phase 5 — Visual style
 

@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {"id": "in", "type": "box", "label": "input"},
+    {"id": "tri", "type": "custom", "w": 80, "h": 80,
+     "svg": "<polygon points='40,5 75,75 5,75' fill='none' stroke='black' stroke-width='1.5'/><text x='40' y='62' text-anchor='middle' font-family='monospace' font-size='12'>tri</text>"},
+    {"id": "hex", "type": "custom", "w": 90, "h": 80, "label": "hex",
+     "svg": "<polygon points='25,5 65,5 85,40 65,75 25,75 5,40' fill='none' stroke='black' stroke-width='1.5'/>"},
+    {"id": "out", "type": "box", "label": "output"}
+  ],
+  "edges": [
+    {"from": "in", "to": "tri"},
+    {"from": "tri", "to": "hex"},
+    {"from": "hex", "to": "out"}
+  ]
+}

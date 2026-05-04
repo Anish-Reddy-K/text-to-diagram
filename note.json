@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"id": "client", "type": "box",  "label": "client"},
+    {"id": "api",    "type": "box",  "label": "api"},
+    {"id": "n1",     "type": "note", "label": "TLS only"}
+  ],
+  "edges": [
+    {"from": "client", "to": "api"},
+    {"from": "n1",     "to": "api", "style": "dashed"}
+  ]
+}
