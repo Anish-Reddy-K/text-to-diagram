@@ -125,7 +125,7 @@ The end-to-end goal of this phase: a stranger on the internet runs *two commands
 
 **Promotion**
 
-- [ ] **35.** README polish for first impressions: install line at the very top (both `pipx install diagrammer` and the `/plugin install` command), an embedded example SVG (rendered by the tool itself), a 30-second "what is this" paragraph, and a link to `prompt.md`. Verify: a cold reader of the README knows what this is and how to install in <30s.
+- [x] **35.** README polish for first impressions: install line at the very top (both `pipx install diagrammer` and the `/plugin install` command), an embedded example SVG (rendered by the tool itself), a 30-second "what is this" paragraph, and a link to `prompt.md`. Verify: a cold reader of the README knows what this is and how to install in <30s.
 - [ ] **36.** LinkedIn launch post. Lead with a generated SVG (use the tool to make it), one-paragraph pitch (LLM-first spec → blueprint SVG, no design tool), link to GitHub. Verify: post is live; the embedded image was produced by the tool itself.
 - [ ] **37.** Submit to third-party Claude skill directories for discoverability: claudemarketplaces.com, skillsmp.com, claudeskills.info, and a PR to the Claude Code Templates community repo. Verify: at least two of these list the skill with a working install command.
 
