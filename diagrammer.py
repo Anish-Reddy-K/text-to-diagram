@@ -17,6 +17,8 @@ def render(spec):
 
     router = spec.get("router", "straight")
     body = []
+    for edge in edges:
+        body.append(_edge(edge, by_id, router, direction))
     for node in nodes:
         if node["type"] == "box":
             body.append(_box(node))
@@ -26,8 +28,8 @@ def render(spec):
             body.append(_text(node))
         elif node["type"] == "database":
             body.append(_database(node))
-    for edge in edges:
-        body.append(_edge(edge, by_id, router, direction))
+        elif node["type"] == "stack":
+            body.append(_stack(node))
     return _svg(width, height, body)
 
 
@@ -52,6 +54,26 @@ def _text(node):
         f'dominant-baseline="middle" font-family="monospace" '
         f'font-size="14">{label}</text>'
     )
+
+
+def _stack(node):
+    x, y, w, h = node["x"], node["y"], node["w"], node["h"]
+    count = node.get("count", 3)
+    offset = 6
+    label = node.get("label", "")
+    cx, cy = x + w / 2, y + h / 2
+    style = 'fill="white" stroke="black" stroke-width="1.5"'
+    rects = []
+    for i in range(count - 1, -1, -1):
+        rx = x + i * offset
+        ry = y - i * offset
+        rects.append(f'<rect x="{rx}" y="{ry}" width="{w}" height="{h}" {style}/>')
+    text = (
+        f'<text x="{cx}" y="{cy}" text-anchor="middle" '
+        f'dominant-baseline="middle" font-family="monospace" '
+        f'font-size="14">{label}</text>'
+    )
+    return "".join(rects) + text
 
 
 def _database(node):
@@ -222,6 +244,9 @@ def _apply_defaults(nodes):
         elif n["type"] == "database":
             n.setdefault("w", 80)
             n.setdefault("h", 80)
+        elif n["type"] == "stack":
+            n.setdefault("w", DEFAULT_W)
+            n.setdefault("h", DEFAULT_H)
         else:
             n.setdefault("w", DEFAULT_W)
             n.setdefault("h", DEFAULT_H)

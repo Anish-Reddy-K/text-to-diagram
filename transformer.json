@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"id": "tok",   "type": "box",   "label": "tokens"},
+    {"id": "blocks","type": "stack", "label": "transformer", "count": 6},
+    {"id": "head",  "type": "box",   "label": "lm_head"}
+  ],
+  "edges": [
+    {"from": "tok",    "to": "blocks"},
+    {"from": "blocks", "to": "head"}
+  ]
+}
