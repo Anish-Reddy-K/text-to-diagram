@@ -77,12 +77,12 @@ The escape hatch when the core set isn't enough. The LLM writes SVG fragments in
 ## Phase 5 — LLM workflow
 
 - [x] **21.** `validate(spec)` and wire into `render`: check required keys, edge endpoints exist, no duplicate ids; on invalid spec raise with all errors at once. Verify: spec missing `nodes[0].type` and with a dangling edge reports both.
-- [ ] **22.** Write `prompt.md` — one-page snippet teaching the spec format, with 3 worked examples (flow, MLP, system architecture) and a section on the `custom` escape hatch. Verify: paste into a fresh Claude/GPT, ask for a diagram, get valid JSON; ask for an unsupported shape, get a `custom` node.
-- [ ] **23.** Add a `prompt` subcommand: `python diagrammer.py prompt` prints `prompt.md` to stdout. Verify: output matches the file.
+- [x] **22.** Write `prompt.md` — one-page snippet teaching the spec format, with 3 worked examples (flow, MLP, system architecture) and a section on the `custom` escape hatch. Verify: paste into a fresh Claude/GPT, ask for a diagram, get valid JSON; ask for an unsupported shape, get a `custom` node.
+- [x] **23.** Add a `prompt` subcommand: `python diagrammer.py prompt` prints `prompt.md` to stdout. Verify: output matches the file.
 
 ## Phase 6 — Tests
 
-- [ ] **24.** Set up `tests/` with `unittest` (stdlib). One snapshot per built-in component (box, circle, text, database, stack, group, note, custom) comparing rendered SVG to a checked-in `.svg` file. Verify: `python -m unittest` passes; regressions in any component break a single test.
+- [x] **24.** Set up `tests/` with `unittest` (stdlib). One snapshot per built-in component (box, circle, text, database, stack, group, note, custom) comparing rendered SVG to a checked-in `.svg` file. Verify: `python -m unittest` passes; regressions in any component break a single test.
 
 ## Phase 7 — Packaging
 

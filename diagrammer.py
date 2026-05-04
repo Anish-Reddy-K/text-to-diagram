@@ -497,12 +497,18 @@ def _svg(width, height, body, extra_defs=""):
 
 if __name__ == "__main__":
     import json
+    import os
     import sys
 
-    if len(sys.argv) < 2 or sys.argv[1] == "-":
-        spec = json.load(sys.stdin)
+    if len(sys.argv) >= 2 and sys.argv[1] == "prompt":
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prompt.md")
+        with open(path) as f:
+            sys.stdout.write(f.read())
     else:
-        with open(sys.argv[1]) as f:
-            spec = json.load(f)
-    sys.stdout.write(render(spec))
+        if len(sys.argv) < 2 or sys.argv[1] == "-":
+            spec = json.load(sys.stdin)
+        else:
+            with open(sys.argv[1]) as f:
+                spec = json.load(f)
+        sys.stdout.write(render(spec))
 
