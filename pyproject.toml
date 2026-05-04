@@ -2,9 +2,26 @@
 name = "diagrammer"
 version = "0.1.0"
 description = "Turn a JSON spec into a clean blueprint-style SVG diagram."
+readme = "README.md"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
 authors = [{name = "Anish Reddy"}]
+keywords = ["diagram", "svg", "blueprint", "architecture", "neural-network", "claude-skill"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Software Development :: Documentation",
+]
+
+[project.urls]
+Homepage = "https://github.com/Anish-Reddy-K/text-to-diagram"
+Source = "https://github.com/Anish-Reddy-K/text-to-diagram"
+Issues = "https://github.com/Anish-Reddy-K/text-to-diagram/issues"
 
 [project.scripts]
 diagrammer = "diagrammer:cli"

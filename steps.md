@@ -113,7 +113,7 @@ The end-to-end goal of this phase: a stranger on the internet runs *two commands
 
 **GitHub + CI**
 
-- [ ] **32.** Push to GitHub (public repo). Add `.github/workflows/test.yml` running `python -m unittest` on push + PR. Verify: green check on the latest commit on `master`.
+- [x] **32.** Push to GitHub (public repo). Add `.github/workflows/test.yml` running `python -m unittest` on push + PR. Verify: green check on the latest commit on `master`.
 
 **PyPI**
 
