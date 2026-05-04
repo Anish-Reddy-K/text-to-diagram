@@ -1,0 +1,5 @@
+{
+  "name": "diagrammer",
+  "description": "Render a JSON spec into a hand-crafted SVG diagram (flows, neural nets, system architectures).",
+  "version": "0.1.0"
+}

@@ -1,0 +1,18 @@
+{
+  "name": "diagrammer-tools",
+  "owner": {
+    "name": "Anish Reddy"
+  },
+  "description": "Tools for turning text into clean blueprint-style SVG diagrams.",
+  "plugins": [
+    {
+      "name": "diagrammer",
+      "source": "./plugins/diagrammer",
+      "description": "Render a JSON spec into a hand-crafted SVG diagram (flows, neural nets, system architectures).",
+      "version": "0.1.0",
+      "license": "MIT",
+      "homepage": "https://github.com/Anish-Reddy-K/text-to-diagram",
+      "keywords": ["diagram", "svg", "skill", "blueprint", "architecture"]
+    }
+  ]
+}
