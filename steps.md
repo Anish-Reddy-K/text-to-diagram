@@ -105,7 +105,7 @@ The end-to-end goal of this phase: a stranger on the internet runs *two commands
 
 **Pre-flight cleanup**
 
-- [ ] **30.** Repo cleanup so `python -m unittest` (no args, from root) passes and tracked files are intentional. Concretely: rename `test_registry.py` → `registry_demo.py` so unittest discovery doesn't pick it up; delete the stray `out.svg`; untrack `src/diagrammer.egg-info/`; expand `.gitignore` with `.venv/`, `*.egg-info/`, `out.svg`. Verify: `python -m unittest` passes from repo root; `git ls-files` shows no build artifacts or stray SVGs.
+- [x] **30.** Repo cleanup so `python -m unittest` (no args, from root) passes and tracked files are intentional. Concretely: rename `test_registry.py` → `registry_demo.py` so unittest discovery doesn't pick it up; delete the stray `out.svg`; untrack `src/diagrammer.egg-info/`; expand `.gitignore` with `.venv/`, `*.egg-info/`, `out.svg`. Verify: `python -m unittest` passes from repo root; `git ls-files` shows no build artifacts or stray SVGs.
 
 **Plugin marketplace (Claude Code distribution)**
 
