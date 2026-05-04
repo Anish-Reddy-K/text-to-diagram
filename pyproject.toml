@@ -19,9 +19,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Anish-Reddy-K/text-to-diagram"
-Source = "https://github.com/Anish-Reddy-K/text-to-diagram"
-Issues = "https://github.com/Anish-Reddy-K/text-to-diagram/issues"
+Homepage = "https://github.com/Anish-Reddy-K/diagrammer"
+Source = "https://github.com/Anish-Reddy-K/diagrammer"
+Issues = "https://github.com/Anish-Reddy-K/diagrammer/issues"
 
 [project.scripts]
 diagrammer = "diagrammer:cli"

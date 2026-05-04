@@ -11,7 +11,7 @@
       "description": "Render a JSON spec into a hand-crafted SVG diagram (flows, neural nets, system architectures).",
       "version": "0.1.0",
       "license": "MIT",
-      "homepage": "https://github.com/Anish-Reddy-K/text-to-diagram",
+      "homepage": "https://github.com/Anish-Reddy-K/diagrammer",
       "keywords": ["diagram", "svg", "skill", "blueprint", "architecture"]
     }
   ]

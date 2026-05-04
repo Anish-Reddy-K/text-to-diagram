@@ -121,7 +121,7 @@ The end-to-end goal of this phase: a stranger on the internet runs *two commands
 
 **End-to-end verification (the real test)**
 
-- [ ] **34.** Full cold-start loop on a clean machine (or fresh user account): (a) `pipx install diagrammer`, (b) in Claude Code, `/plugin marketplace add <user>/<repo>` + `/plugin install diagrammer@diagrammer-tools`, (c) ask Claude to draw a non-trivial diagram (transformer block, request flow), (d) confirm the SVG renders correctly when opened. Verify: zero manual fixes between install and a usable SVG. If anything breaks, fix and re-cut a patch release before promoting.
+- [x] **34.** Full cold-start loop on a clean machine (or fresh user account): (a) `pipx install diagrammer`, (b) in Claude Code, `/plugin marketplace add <user>/<repo>` + `/plugin install diagrammer@diagrammer-tools`, (c) ask Claude to draw a non-trivial diagram (transformer block, request flow), (d) confirm the SVG renders correctly when opened. Verify: zero manual fixes between install and a usable SVG. If anything breaks, fix and re-cut a patch release before promoting.
 
 **Promotion**
 

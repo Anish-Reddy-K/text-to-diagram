@@ -33,7 +33,7 @@ python -m diagrammer path/to/spec.json > out.svg
 The package isn't installed in the active python. Locate the repo (it contains `src/diagrammer/__init__.py`) and run with `PYTHONPATH` instead — no install needed:
 
 ```bash
-PYTHONPATH=/path/to/text-to-diagram/src python -m diagrammer path/to/spec.json > out.svg
+PYTHONPATH=/path/to/diagrammer/src python -m diagrammer path/to/spec.json > out.svg
 ```
 
 If you don't know the repo path, find it: `find ~ -type d -name diagrammer -path '*/src/diagrammer' 2>/dev/null | head -1` and use the parent's parent (drop `/src/diagrammer`).
