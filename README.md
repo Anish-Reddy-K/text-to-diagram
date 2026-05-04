@@ -4,7 +4,7 @@ Turn a JSON spec into a clean, blueprint-style SVG diagram. Designed so an LLM c
 
 No dependencies. Stdlib only. Python 3.8+.
 
-![system architecture](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/system.png)
+![LLM inference pipeline](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/hero.png)
 
 ## Install
 
@@ -86,9 +86,15 @@ Just `box` and `circle` nodes plus edges — auto-layout handles the column flow
 }
 ```
 
-### System architecture (group + database + note)
+### LLM inference pipeline
 
-The hero image at the top of this README. Combines `box`, `database`, `group`, `note`, edge labels, and a dashed annotation edge — see [`examples/system.json`](examples/system.json).
+The hero image at the top of this README. A prompt flows through tokenization, embeddings, transformer layers, normalization, the language-model head, and returns the next token — see [`examples/inference.json`](examples/inference.json).
+
+### System architecture (group + database)
+
+![system architecture](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/system.png)
+
+Combines `box`, `database`, `group`, and edge labels — see [`examples/system.json`](examples/system.json).
 
 ### Custom shapes
 

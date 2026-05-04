@@ -6,8 +6,7 @@
     {"id": "api2", "type": "box", "label": "api"},
     {"id": "fleet", "type": "group", "label": "api fleet", "children": ["api1", "api2"]},
     {"id": "db", "type": "database", "label": "postgres"},
-    {"id": "cache", "type": "database", "label": "redis"},
-    {"id": "n1", "type": "note", "label": "horizontally scaled"}
+    {"id": "cache", "type": "database", "label": "redis"}
   ],
   "edges": [
     {"from": "user", "to": "lb"},
@@ -16,7 +15,6 @@
     {"from": "api1", "to": "db", "label": "write"},
     {"from": "api2", "to": "db", "label": "write"},
     {"from": "api1", "to": "cache", "label": "read"},
-    {"from": "api2", "to": "cache", "label": "read"},
-    {"from": "n1", "to": "api1", "style": "dashed"}
+    {"from": "api2", "to": "cache", "label": "read"}
   ]
 }

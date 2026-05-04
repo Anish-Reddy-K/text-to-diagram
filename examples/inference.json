@@ -1,0 +1,19 @@
+{
+  "nodes": [
+    {"id": "in",     "type": "text",  "label": "prompt"},
+    {"id": "tok",    "type": "box",   "label": "tokenizer"},
+    {"id": "emb",    "type": "box",   "label": "embeddings"},
+    {"id": "blocks", "type": "stack", "label": "transformer", "count": 6},
+    {"id": "norm",   "type": "box",   "label": "layer norm"},
+    {"id": "head",   "type": "box",   "label": "lm_head"},
+    {"id": "out",    "type": "text",  "label": "next token"}
+  ],
+  "edges": [
+    {"from": "in",     "to": "tok"},
+    {"from": "tok",    "to": "emb"},
+    {"from": "emb",    "to": "blocks"},
+    {"from": "blocks", "to": "norm"},
+    {"from": "norm",   "to": "head"},
+    {"from": "head",   "to": "out"}
+  ]
+}
