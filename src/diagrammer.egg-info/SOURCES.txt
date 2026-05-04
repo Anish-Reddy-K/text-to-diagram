@@ -1,3 +1,5 @@
+LICENSE
+README.md
 pyproject.toml
 src/diagrammer/__init__.py
 src/diagrammer/__main__.py

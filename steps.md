@@ -89,7 +89,7 @@ The escape hatch when the core set isn't enough. The LLM writes SVG fragments in
 ## Phase 7 — Packaging
 
 - [x] **25.** Move `diagrammer.py` into `src/diagrammer/__init__.py`. Add `pyproject.toml` with `[project.scripts] diagrammer = "diagrammer:cli"`. Verify: `pip install -e .` then `diagrammer mlp.json > out.svg` works from any directory.
-- [ ] **26.** Add `README.md`: install, 30-second example, spec reference, prompt link, custom components.
+- [x] **26.** Add `README.md`: install, 30-second example, spec reference, prompt link, custom components.
 - [ ] **27.** Add `LICENSE` (MIT).
 
 ## Phase 8 — Distribution
