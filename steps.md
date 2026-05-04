@@ -11,19 +11,21 @@
 - **Surgical changes.** Every step touches only what it must. No speculative abstractions, no "flexibility" features, no error handling for impossible cases. If a step's diff has unrelated cleanup, the step is wrong.
 - **LLM-first spec.** Field names are short and obvious (`from`, `to`, `label`, `type`). Defaults are aggressive so a minimal spec — just `nodes` + `edges` with `type` and `label` — produces a usable diagram. Auto-layout fills in any missing `x`/`y`/`w`/`h`.
 
-**Stack.** Python 3, stdlib only. No build step, no `pip install` (until packaging in Phase 9). Tests use `unittest` (stdlib). The three eventual distribution interfaces (Claude Skill, MCP server, interactive CLI) are all thin wrappers over a single function: `render(spec) -> svg_string`.
+**Stack.** Python 3, stdlib-only runtime. Packaging/build tools are used only for distribution. Tests use `unittest` (stdlib). The distribution interfaces (Claude Skill, MCP server, CLI, and Python API) are thin wrappers over a single function: `render(spec) -> svg_string`.
 
-**Current state.** Phases 0–8 (steps 1–29) are done. The package lives at `src/diagrammer/__init__.py` and exports `render(spec)`, `validate(spec)`, `register_component(name, fn, default_w, default_h)`, and `cli()`. Installed via `pip install -e .`; the `diagrammer` console script and `python -m diagrammer` both work. `diagrammer prompt` prints the LLM-facing spec doc (`src/diagrammer/prompt.md`). Distribution: a Claude Skill at `plugins/diagrammer/skills/diagrammer/SKILL.md` (distributed via the plugin marketplace defined at `.claude-plugin/marketplace.json`) and an MCP server at `mcp_server.py` (optional `[mcp]` extra) — both verified end-to-end against Claude Code and Claude Desktop respectively. Built-in node types: `box`, `circle`, `text`, `database`, `stack`, `group`, `note`, `custom`. Edges support labels (with auto-widened column gaps for breathing room), `style` (dashed/solid), `weight` (thin/thick), self-loops, and `router: "ortho"` for right-angle bends. Layout supports `direction` (LR/TB), per-spec `col_gap`/`row_gap`/`margin`, vertical centering of columns, and a 30%-from-source bend bias for ortho. Spec accepts a top-level `defs` string for shared SVG defs (gradients, custom markers, filters) referenced from `custom` nodes. Edges are drawn behind nodes so stacks visually emerge from behind their back layers. CLI reads JSON from a path or stdin.
+**Current state.** Phases 0–8 and Phase 9 steps 30–35 are done. `diagrammer` is published on PyPI as `0.1.0`, the public GitHub repo is `Anish-Reddy-K/diagrammer`, CI runs `python -m unittest`, and the README has a generated PNG showcase with an opaque white hero image (`docs/img/hero.png`) rendered from `examples/inference.json`. The package lives at `src/diagrammer/__init__.py` and exports `render(spec)`, `validate(spec)`, `register_component(name, fn, default_w, default_h)`, and `cli()`. `pipx install diagrammer`, the `diagrammer` console script, and `python -m diagrammer` work. `diagrammer prompt` prints the LLM-facing spec doc (`src/diagrammer/prompt.md`). Distribution: a Claude Skill at `plugins/diagrammer/skills/diagrammer/SKILL.md` (distributed via the plugin marketplace defined at `.claude-plugin/marketplace.json`) and an MCP server at `mcp_server.py` (optional `[mcp]` extra) — both verified end-to-end against Claude Code and Claude Desktop respectively. Built-in node types: `box`, `circle`, `text`, `database`, `stack`, `group`, `note`, `custom`. Edges support labels (with auto-widened column gaps for breathing room), `style` (dashed/solid), `weight` (thin/thick), self-loops, and `router: "ortho"` for right-angle bends. Layout supports `direction` (LR/TB), per-spec `col_gap`/`row_gap`/`margin`, vertical centering of columns, and a 30%-from-source bend bias for ortho. Spec accepts a top-level `defs` string for shared SVG defs (gradients, custom markers, filters) referenced from `custom` nodes. Edges are drawn behind nodes so stacks visually emerge from behind their back layers. CLI reads JSON from a path or stdin. `AGENTS.md` contains the working rules for future coding agents.
 
 **Layout.**
 ```
 src/diagrammer/      # the library + CLI (__init__.py, __main__.py, prompt.md)
 pyproject.toml       # packaging
 tests/               # unittest snapshots, one per built-in component
-CLAUDE.md            # behavioral guidelines
+CLAUDE.md            # Claude-specific behavioral guidelines
+AGENTS.md            # agent-wide coding guidelines
 steps.md             # this file
 registry_demo.py     # demo of register_component (Python API)
-examples/            # JSON specs the CLI reads (mlp, ortho, transformer, grouped, note, custom, defs, …)
+examples/            # JSON specs the CLI reads (mlp, inference, system, ortho, transformer, grouped, note, custom, defs, …)
+docs/img/            # README/showcase SVGs and opaque PNGs rendered from examples
 scratch/             # early phase-0 verification scripts (test1–4); kept for reference
 ```
 
@@ -125,8 +127,8 @@ The end-to-end goal of this phase: a stranger on the internet runs *two commands
 
 **Promotion**
 
-- [x] **35.** README polish for first impressions: install line at the very top (both `pipx install diagrammer` and the `/plugin install` command), an embedded example SVG (rendered by the tool itself), a 30-second "what is this" paragraph, and a link to `prompt.md`. Verify: a cold reader of the README knows what this is and how to install in <30s.
-- [ ] **36.** LinkedIn launch post. Lead with a generated SVG (use the tool to make it), one-paragraph pitch (LLM-first spec → blueprint SVG, no design tool), link to GitHub. Verify: post is live; the embedded image was produced by the tool itself.
+- [x] **35.** README polish for first impressions: install line at the very top (both `pipx install diagrammer` and the `/plugin install` command), a generated hero image, a 30-second "what is this" paragraph, and a link to `prompt.md`. Verify: a cold reader of the README knows what this is and how to install in <30s; GitHub dark mode shows the hero and examples on opaque white PNG backgrounds.
+- [ ] **36.** LinkedIn launch post. Lead with a generated SVG or opaque PNG (use the tool to make it), one-paragraph pitch (LLM-first spec → blueprint SVG, no design tool), link to GitHub. Verify: post is live; the embedded image was produced by the tool itself.
 - [ ] **37.** Submit to third-party Claude skill directories for discoverability: claudemarketplaces.com, skillsmp.com, claudeskills.info, and a PR to the Claude Code Templates community repo. Verify: at least two of these list the skill with a working install command.
 
 ## Phase 10 — Beyond
