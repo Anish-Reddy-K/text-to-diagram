@@ -4,7 +4,7 @@ Turn a JSON spec into a clean, blueprint-style SVG diagram. Designed so an LLM c
 
 No dependencies. Stdlib only. Python 3.8+.
 
-![system architecture](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/system.svg)
+![system architecture](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/system.png)
 
 ## Install
 
@@ -46,7 +46,7 @@ Each SVG below is rendered by the tool itself from the matching JSON spec in [`e
 
 ### Request flow with edge labels
 
-![flow](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/flow.svg)
+![flow](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/flow.png)
 
 ```json
 {
@@ -64,13 +64,13 @@ Each SVG below is rendered by the tool itself from the matching JSON spec in [`e
 
 ### Neural network (fan-in / fan-out)
 
-![mlp](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/mlp.svg)
+![mlp](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/mlp.png)
 
 Just `box` and `circle` nodes plus edges — auto-layout handles the column flow and vertical centering.
 
 ### Transformer block (stack component)
 
-![transformer](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/transformer.svg)
+![transformer](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/transformer.png)
 
 ```json
 {
@@ -92,7 +92,7 @@ The hero image at the top of this README. Combines `box`, `database`, `group`, `
 
 ### Custom shapes
 
-![custom](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/custom.svg)
+![custom](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/custom.png)
 
 When no built-in shape fits, drop in raw SVG with `type: "custom"`:
 
@@ -105,7 +105,7 @@ When no built-in shape fits, drop in raw SVG with `type: "custom"`:
 
 ### Custom + shared `defs` (gradients, markers)
 
-![gradient](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/gradient.svg)
+![gradient](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/gradient.png)
 
 A spec-level `"defs"` block injects shared SVG defs (gradients, custom markers, filters) that any `custom` node can reference by id. See [`examples/defs.json`](examples/defs.json).
 
