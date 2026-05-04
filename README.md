@@ -1,153 +1,174 @@
 # diagrammer
 
-Turn a JSON spec into a clean, blueprint-style SVG diagram. Designed so an LLM can write the spec from a plain-English description — describe → JSON → SVG → drop into post.
+Ask your coding agent for a clean technical diagram. Get back an SVG you can drop into a README, blog post, design doc, or slide.
 
-No dependencies. Stdlib only. Python 3.8+.
+`diagrammer` is a small Python renderer plus a Claude Code skill. The skill lets Claude turn plain-English diagram requests into a JSON spec, render that spec with the CLI, and hand you the finished SVG.
 
 ![LLM inference pipeline](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/hero.png)
 
-## Install
+## Use It From Claude Code
+
+Install the CLI:
 
 ```bash
 pipx install diagrammer
 ```
 
-Or use it directly from Claude Code as a skill:
+Install the Claude Code skill:
 
-```
+```text
 /plugin marketplace add Anish-Reddy-K/diagrammer
 /plugin install diagrammer@diagrammer-tools
 ```
 
-Then ask Claude: *"draw an SVG diagram of a request flow: client → api → db"*.
+Then ask Claude Code for the diagram you want:
 
-## 30-second example
-
-```bash
-echo '{
-  "nodes": [
-    {"id": "x",  "type": "box",    "label": "input"},
-    {"id": "h1", "type": "circle", "label": "h1"},
-    {"id": "h2", "type": "circle", "label": "h2"},
-    {"id": "y",  "type": "box",    "label": "output"}
-  ],
-  "edges": [
-    {"from": "x", "to": "h1"}, {"from": "x", "to": "h2"},
-    {"from": "h1", "to": "y"}, {"from": "h2", "to": "y"}
-  ]
-}' | diagrammer - > mlp.svg && open mlp.svg
+```text
+Draw an SVG diagram of a request flow: browser -> API -> Postgres -> response.
 ```
 
-Or from a file: `diagrammer examples/mlp.json > out.svg`.
+Claude writes the spec, runs `diagrammer`, and gives you an SVG file.
+
+## What It Is For
+
+Use `diagrammer` when you need a simple, useful technical diagram:
+
+- system architecture
+- request flows
+- neural nets and transformer blocks
+- state machines
+- data pipelines
+- quick visuals for docs, posts, and PRs
+
+It is intentionally small: black-and-white blueprint-style SVG, a fixed set of diagram primitives, and no design-tool workflow.
+
+## How It Works
+
+The loop is:
+
+```text
+plain English -> JSON spec -> diagrammer -> SVG
+```
+
+The JSON is the interface between the LLM and the renderer. The LLM is good at describing structure; `diagrammer` is responsible for layout, arrows, labels, and SVG output.
+
+Example spec:
+
+```json
+{
+  "nodes": [
+    {"id": "client", "type": "box", "label": "client"},
+    {"id": "api", "type": "box", "label": "api"},
+    {"id": "db", "type": "database", "label": "postgres"}
+  ],
+  "edges": [
+    {"from": "client", "to": "api", "label": "request"},
+    {"from": "api", "to": "db", "label": "query"}
+  ]
+}
+```
+
+Render it:
+
+```bash
+diagrammer spec.json > diagram.svg
+```
+
+## Using Other Agents
+
+The Claude Code skill is the easiest path because it tells Claude exactly when and how to use the renderer.
+
+In Codex or another coding agent, use the CLI directly. Ask the agent to create a diagram spec and run:
+
+```bash
+diagrammer path/to/spec.json > diagram.svg
+```
+
+For better results, give the agent the built-in guide:
+
+```bash
+diagrammer prompt
+```
+
+That prints the JSON format and examples the agent should follow.
 
 ## Examples
 
-Each SVG below is rendered by the tool itself from the matching JSON spec in [`examples/`](examples/).
+Each image below is rendered by `diagrammer` from a JSON file in [`examples/`](examples/).
 
-### Request flow with edge labels
+### Request Flow
 
 ![flow](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/flow.png)
 
-```json
-{
-  "nodes": [
-    {"id": "a", "type": "box", "label": "client"},
-    {"id": "b", "type": "box", "label": "server"},
-    {"id": "c", "type": "box", "label": "db"}
-  ],
-  "edges": [
-    {"from": "a", "to": "b", "label": "request"},
-    {"from": "b", "to": "c", "label": "query"}
-  ]
-}
-```
+Good for docs that need to show services, edges, and labels without a heavy architecture tool.
 
-### Neural network (fan-in / fan-out)
+### Neural Network
 
 ![mlp](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/mlp.png)
 
-Just `box` and `circle` nodes plus edges — auto-layout handles the column flow and vertical centering.
+Boxes, circles, fan-in, fan-out, and automatic column layout.
 
-### Transformer block (stack component)
+### Transformer Stack
 
 ![transformer](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/transformer.png)
 
-```json
-{
-  "nodes": [
-    {"id": "tok",    "type": "box",   "label": "tokens"},
-    {"id": "blocks", "type": "stack", "label": "transformer", "count": 6},
-    {"id": "head",   "type": "box",   "label": "lm_head"}
-  ],
-  "edges": [
-    {"from": "tok",    "to": "blocks"},
-    {"from": "blocks", "to": "head"}
-  ]
-}
-```
+The `stack` node is useful for repeated blocks like transformer layers, worker pools, queues, and service replicas.
 
-### LLM inference pipeline
-
-The hero image at the top of this README. A prompt flows through tokenization, embeddings, transformer layers, normalization, the language-model head, and returns the next token — see [`examples/inference.json`](examples/inference.json).
-
-### System architecture (group + database)
+### System Architecture
 
 ![system architecture](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/system.png)
 
-Combines `box`, `database`, `group`, and edge labels — see [`examples/system.json`](examples/system.json).
+Groups, databases, edge labels, and simple service topology.
 
-### Custom shapes
+### Custom Shapes
 
 ![custom](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/custom.png)
 
-When no built-in shape fits, drop in raw SVG with `type: "custom"`:
+If a built-in node is not enough, a spec can include a small raw SVG fragment as a `custom` node.
 
-```json
-{
-  "id": "tri", "type": "custom", "w": 80, "h": 80,
-  "svg": "<polygon points='40,5 75,75 5,75' fill='none' stroke='black' stroke-width='1.5'/>"
-}
-```
-
-### Custom + shared `defs` (gradients, markers)
+### Custom SVG Defs
 
 ![gradient](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/gradient.png)
 
-A spec-level `"defs"` block injects shared SVG defs (gradients, custom markers, filters) that any `custom` node can reference by id. See [`examples/defs.json`](examples/defs.json).
+Specs can include shared SVG `defs` for markers, gradients, and other reusable SVG pieces.
 
-## Spec reference
+## Spec Reference
 
 Top-level keys:
 
-- `nodes` (required) — list of nodes, each with `id`, `type`, optional `label`.
-- `edges` (required) — list of edges, each with `from`, `to`, optional `label`, `style` (`"dashed"` / `"solid"`), `weight` (`"thin"` / `"thick"`).
-- `direction` — `"LR"` (default) or `"TB"`.
-- `router` — `"straight"` (default) or `"ortho"` for right-angle bends.
-- `col_gap`, `row_gap`, `margin` — layout tuning.
-- `defs` — raw SVG defs string injected into `<defs>` (markers, gradients, filters).
+- `nodes` - list of nodes, each with `id`, `type`, and optional `label`.
+- `edges` - list of edges, each with `from`, `to`, and optional `label`.
+- `direction` - `"LR"` by default, or `"TB"` for top-to-bottom.
+- `router` - `"straight"` by default, or `"ortho"` for right-angle bends.
+- `col_gap`, `row_gap`, `margin` - layout tuning.
+- `defs` - raw SVG defs injected into the output.
 
-Built-in node types: `box`, `circle`, `text`, `database`, `stack` (param: `count`), `note`, `group` (param: `children: [nodeIds]`), `custom` (params: `svg`, `w`, `h`).
+Built-in node types:
 
-Auto-layout fills in any missing `x` / `y` / `w` / `h`. Don't hand-place nodes unless you need to.
+- `box`
+- `circle`
+- `text`
+- `database`
+- `stack`
+- `group`
+- `note`
+- `custom`
 
-## LLM workflow
+Auto-layout fills in missing `x`, `y`, `w`, and `h`. Most specs should not hand-place nodes.
 
-`prompt.md` (printable via `diagrammer prompt`) is a one-page doc you can paste into Claude/GPT to teach the spec format. The intended loop:
+## Python API
 
-```bash
-# in a chat with an LLM, paste the output of `diagrammer prompt`, then ask:
-#   "draw a 3-layer MLP with a softmax head"
-# copy the JSON it returns, then:
-pbpaste | diagrammer - > mlp.svg && open mlp.svg
+```python
+from diagrammer import render
+
+svg = render(spec)
 ```
 
-Or skip the copy/paste and use the Claude Code plugin (see Install above).
+For Python-side extension, `register_component(name, render_fn, default_w, default_h)` lets you add node types without modifying the package. See [`registry_demo.py`](registry_demo.py).
 
-## Python API extension
+## Development
 
-For Python-side extension, `register_component(name, render_fn, default_w, default_h)` lets you add new node types without modifying the package. See [`registry_demo.py`](registry_demo.py).
-
-## Tests
+Run tests:
 
 ```bash
 python -m unittest

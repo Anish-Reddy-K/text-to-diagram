@@ -21,16 +21,28 @@ Skip it if they want a chart with axes (use a plotting tool), a UML class diagra
 3. Save it and render:
 
 ```bash
-echo '<JSON>' | python -m diagrammer - > out.svg
+echo '<JSON>' | diagrammer - > out.svg
 # or
-python -m diagrammer path/to/spec.json > out.svg
+diagrammer path/to/spec.json > out.svg
 ```
 
 4. Show the user the SVG path. If they want to view it: `open out.svg` (macOS) or print the contents.
 
-### If `python -m diagrammer` fails with `No module named diagrammer`
+### If `diagrammer` is not on PATH
 
-The package isn't installed in the active python. Locate the repo (it contains `src/diagrammer/__init__.py`) and run with `PYTHONPATH` instead — no install needed:
+Ask the user to install the CLI:
+
+```bash
+pipx install diagrammer
+```
+
+If the package is available in the active Python but the console script is not on PATH, use:
+
+```bash
+python -m diagrammer path/to/spec.json > out.svg
+```
+
+If you're working from a local checkout and the package is not installed, locate the repo (it contains `src/diagrammer/__init__.py`) and run with `PYTHONPATH` instead:
 
 ```bash
 PYTHONPATH=/path/to/diagrammer/src python -m diagrammer path/to/spec.json > out.svg
