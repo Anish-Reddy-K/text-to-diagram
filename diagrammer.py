@@ -1,4 +1,41 @@
+def validate(spec):
+    errors = []
+    nodes = spec.get("nodes", [])
+    edges = spec.get("edges", [])
+
+    ids = []
+    for i, n in enumerate(nodes):
+        if "id" not in n:
+            errors.append(f"nodes[{i}]: missing 'id'")
+        else:
+            ids.append(n["id"])
+        if "type" not in n:
+            label = repr(n.get("id")) if "id" in n else f"index {i}"
+            errors.append(f"nodes[{i}] ({label}): missing 'type'")
+
+    seen, dups = set(), []
+    for i in ids:
+        if i in seen and i not in dups:
+            dups.append(i)
+        seen.add(i)
+    for d in dups:
+        errors.append(f"duplicate node id: {d!r}")
+
+    valid = set(ids)
+    for i, e in enumerate(edges):
+        for end in ("from", "to"):
+            if end not in e:
+                errors.append(f"edges[{i}]: missing {end!r}")
+            elif e[end] not in valid:
+                errors.append(f"edges[{i}]: {end!r} references unknown node {e[end]!r}")
+
+    return errors
+
+
 def render(spec):
+    errors = validate(spec)
+    if errors:
+        raise ValueError("invalid spec:\n  " + "\n  ".join(errors))
     nodes = spec.get("nodes", [])
     edges = spec.get("edges", [])
     direction = spec.get("direction", "LR")

@@ -74,63 +74,38 @@ The escape hatch when the core set isn't enough. The LLM writes SVG fragments in
 - [x] **19.** `defs` block at spec level: `{"defs": "<marker.../>...", "nodes": [...]}` injects shared SVG defs (gradients, filters, custom markers). Verify: a custom arrowhead marker referenced from a `custom` node works.
 - [x] **20.** Component registry (Python-only, not for LLM use): `register_component("foo", fn)` so the CLI can be extended in code. Verify: a user-written `foo` component renders without modifying `diagrammer.py`.
 
-## Phase 5 — Visual style
+## Phase 5 — LLM workflow
 
-- [ ] **21.** Theme system: `"theme": "blueprint" | "minimal" | "sketch"`. Each theme is a dict of stroke colors, widths, fonts, fills. Default = blueprint (thin black lines, monospace, off-white bg).
-- [ ] **22.** Sketch mode: optionally use [rough.js](https://roughjs.com/)-style hand-drawn lines. Implementation: hand-rolled jitter on path coordinates, no dep. Verify: same diagram looks hand-drawn.
-- [ ] **23.** Background grid option: `"grid": true` adds a subtle dotted grid. Verify: blueprint feel.
+- [x] **21.** `validate(spec)` and wire into `render`: check required keys, edge endpoints exist, no duplicate ids; on invalid spec raise with all errors at once. Verify: spec missing `nodes[0].type` and with a dangling edge reports both.
+- [ ] **22.** Write `prompt.md` — one-page snippet teaching the spec format, with 3 worked examples (flow, MLP, system architecture) and a section on the `custom` escape hatch. Verify: paste into a fresh Claude/GPT, ask for a diagram, get valid JSON; ask for an unsupported shape, get a `custom` node.
+- [ ] **23.** Add a `prompt` subcommand: `python diagrammer.py prompt` prints `prompt.md` to stdout. Verify: output matches the file.
 
-## Phase 6 — Spec validation
+## Phase 6 — Tests
 
-- [ ] **24.** `validate(spec)` function: checks required keys, edge endpoints exist, no duplicate ids. Returns list of error strings. Verify: malformed spec returns useful errors instead of crashing.
-- [ ] **25.** Wire validation into `render`: on invalid spec, raise with all errors at once (not just the first). Verify: spec missing both `nodes[0].type` and a dangling edge reports both.
-- [ ] **26.** Publish JSON Schema (`spec.schema.json`) generated from the same source of truth. Verify: schema validates against the example specs.
+- [ ] **24.** Set up `tests/` with `unittest` (stdlib). One snapshot per built-in component (box, circle, text, database, stack, group, note, custom) comparing rendered SVG to a checked-in `.svg` file. Verify: `python -m unittest` passes; regressions in any component break a single test.
 
-## Phase 7 — Tests
+## Phase 7 — Packaging
 
-- [ ] **27.** Set up `tests/` with `unittest` (stdlib, no deps). Add snapshot test: render a fixed spec, compare to checked-in `.svg` file. Verify: `python -m unittest` passes.
-- [ ] **28.** One snapshot per component type (box, circle, text, database, stack, group, note, custom). Verify: regressions in any component break a single test.
-- [ ] **29.** Layout tests: same spec with different `direction`s produces deterministic output. Verify: re-running gives identical SVG.
+- [ ] **25.** Move `diagrammer.py` into `src/diagrammer/__init__.py`. Add `pyproject.toml` with `[project.scripts] diagrammer = "diagrammer:cli"`. Verify: `pip install -e .` then `diagrammer mlp.json > out.svg` works from any directory.
+- [ ] **26.** Add `README.md`: install, 30-second example, spec reference, prompt link, custom components.
+- [ ] **27.** Add `LICENSE` (MIT).
 
-## Phase 8 — The prompt (the AI angle)
-
-- [ ] **30.** Write `prompt.md` — one-page snippet teaching an LLM the spec format, with 3 worked examples (flow, MLP, system architecture). Verify: paste into a fresh Claude/GPT, ask for a diagram, get valid JSON.
-- [ ] **31.** Add a "custom component" section to the prompt explaining the escape hatch with one example. Verify: LLM produces a valid `custom` node when asked for a shape we don't support.
-- [ ] **32.** Add a `prompt` subcommand: `python diagrammer.py prompt` prints the snippet to stdout. So you can `pbcopy` it instantly. Verify: command outputs the same content as `prompt.md`.
-
-## Phase 9 — Packaging
-
-- [ ] **33.** Move `diagrammer.py` into `src/diagrammer/__init__.py`. Add `pyproject.toml` with `[project.scripts] diagrammer = "diagrammer:cli"`. Verify: `pip install -e .` then `diagrammer mlp.json > out.svg` works from any directory.
-- [ ] **34.** Add `README.md` (now justified — it's a published package). Sections: install, 30-second example, spec reference, prompt link, custom components.
-- [ ] **35.** Add `LICENSE` (MIT).
-- [ ] **36.** Add `examples/` dir with 5–10 worked specs covering each component.
-
-## Phase 10 — Distribution interfaces
+## Phase 8 — Distribution
 
 Each interface is a thin wrapper over `render()`. Don't duplicate logic.
 
-- [ ] **37.** **Claude Skill.** Create `skill/SKILL.md` describing what it does and when to invoke. Skill body shells out to `python -m diagrammer`. Verify: install locally, ask Claude to draw something, SVG appears.
-- [ ] **38.** **MCP server.** `mcp_server.py` using the official Python MCP SDK. Exposes one tool: `render_diagram(spec) -> svg_string`. Verify: configure in Claude Desktop, ask for a diagram, server returns SVG.
-- [ ] **39.** **Custom CLI front-end** (interactive). `diagrammer chat`: REPL that pipes user prompts to a configured LLM, parses the JSON reply, renders, opens in default viewer. Verify: type "draw a 3-layer transformer," see SVG open.
-- [ ] **40.** **Web playground (optional).** Single HTML page using Pyodide so the same Python code runs client-side. Textarea for spec, live SVG preview. No backend. Verify: `open playground.html`, edit spec, see live updates.
+- [ ] **28.** **Claude Skill.** Create `skill/SKILL.md` describing what it does and when to invoke. Skill body shells out to `python -m diagrammer`. Verify: install locally, ask Claude to draw something, SVG appears.
+- [ ] **29.** **MCP server.** `mcp_server.py` using the official Python MCP SDK. Exposes one tool: `render_diagram(spec) -> svg_string`. Verify: configure in Claude Desktop, ask for a diagram, server returns SVG.
 
-## Phase 11 — Publish
+## Phase 9 — Publish
 
-- [ ] **41.** Push to GitHub. CI: GitHub Action runs `python -m unittest` on push.
-- [ ] **42.** `pip install build twine`; build wheel + sdist; `twine upload` to PyPI. Verify: fresh machine `pipx install diagrammer` works.
-- [ ] **43.** Tag `v0.1.0`, draft GitHub release with changelog.
-- [ ] **44.** Submit Skill to Anthropic's Skill registry (if/when public). Submit MCP server to the MCP registry.
-- [ ] **45.** Write the launch blog post — *use the tool itself for every diagram in the post.* Verify: post ships with embedded SVGs from the library, end-to-end loop proven on a real workload.
+- [ ] **30.** Push to GitHub. CI: GitHub Action runs `python -m unittest` on push.
+- [ ] **31.** Build wheel + sdist; `twine upload` to PyPI; tag `v0.1.0` and draft GitHub release. Verify: fresh machine `pipx install diagrammer` works.
+- [ ] **32.** Write the launch blog post — *use the tool itself for every diagram in the post.* Verify: post ships with embedded SVGs from the library, end-to-end loop proven on a real workload.
 
-## Phase 12 — Beyond
+## Phase 10 — Beyond
 
-Whatever comes from real use. Likely candidates:
-- Animation (SVG `<animate>` for step-through diagrams)
-- Export to PNG/PDF via headless tooling
-- VS Code extension with live preview
-- Figma plugin export (probably not — defeats the point)
-
-Don't build these speculatively. Wait until a blog post needs them.
+Add steps here only when real use demands them. No speculative roadmap.
 
 ---
 
