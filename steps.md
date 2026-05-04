@@ -117,7 +117,7 @@ The end-to-end goal of this phase: a stranger on the internet runs *two commands
 
 **PyPI**
 
-- [ ] **33.** Build wheel + sdist (`python -m build`), upload to PyPI with `twine`, tag `v0.1.0`, draft a GitHub release with the SVG of an example diagram embedded in the release notes. Verify: in a fresh shell / clean venv, `pipx install diagrammer` then `diagrammer examples/mlp.json > out.svg` works.
+- [x] **33.** Build wheel + sdist (`python -m build`), upload to PyPI with `twine`, tag `v0.1.0`, draft a GitHub release with the SVG of an example diagram embedded in the release notes. Verify: in a fresh shell / clean venv, `pipx install diagrammer` then `diagrammer examples/mlp.json > out.svg` works.
 
 **End-to-end verification (the real test)**
 
