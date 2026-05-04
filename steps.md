@@ -90,13 +90,13 @@ The escape hatch when the core set isn't enough. The LLM writes SVG fragments in
 
 - [x] **25.** Move `diagrammer.py` into `src/diagrammer/__init__.py`. Add `pyproject.toml` with `[project.scripts] diagrammer = "diagrammer:cli"`. Verify: `pip install -e .` then `diagrammer mlp.json > out.svg` works from any directory.
 - [x] **26.** Add `README.md`: install, 30-second example, spec reference, prompt link, custom components.
-- [ ] **27.** Add `LICENSE` (MIT).
+- [x] **27.** Add `LICENSE` (MIT).
 
 ## Phase 8 — Distribution
 
 Each interface is a thin wrapper over `render()`. Don't duplicate logic.
 
-- [ ] **28.** **Claude Skill.** Create `skill/SKILL.md` describing what it does and when to invoke. Skill body shells out to `python -m diagrammer`. Verify: install locally, ask Claude to draw something, SVG appears.
+- [x] **28.** **Claude Skill.** Create `skill/SKILL.md` describing what it does and when to invoke. Skill body shells out to `python -m diagrammer`. Verify: install locally, ask Claude to draw something, SVG appears.
 - [ ] **29.** **MCP server.** `mcp_server.py` using the official Python MCP SDK. Exposes one tool: `render_diagram(spec) -> svg_string`. Verify: configure in Claude Desktop, ask for a diagram, server returns SVG.
 
 ## Phase 9 — Publish

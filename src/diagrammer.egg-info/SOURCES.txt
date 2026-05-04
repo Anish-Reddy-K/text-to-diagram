@@ -8,5 +8,6 @@ src/diagrammer.egg-info/PKG-INFO
 src/diagrammer.egg-info/SOURCES.txt
 src/diagrammer.egg-info/dependency_links.txt
 src/diagrammer.egg-info/entry_points.txt
+src/diagrammer.egg-info/requires.txt
 src/diagrammer.egg-info/top_level.txt
 tests/test_snapshots.py

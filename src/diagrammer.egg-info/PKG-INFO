@@ -27,4 +27,6 @@ License: MIT License
         
 Requires-Python: >=3.8
 License-File: LICENSE
+Provides-Extra: mcp
+Requires-Dist: mcp; extra == "mcp"
 Dynamic: license-file

@@ -9,6 +9,9 @@ authors = [{name = "Anish Reddy"}]
 [project.scripts]
 diagrammer = "diagrammer:cli"
 
+[project.optional-dependencies]
+mcp = ["mcp"]
+
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
