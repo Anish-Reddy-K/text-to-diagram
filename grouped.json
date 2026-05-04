@@ -1,0 +1,18 @@
+{
+  "nodes": [
+    {"id": "x",  "type": "box",    "label": "input"},
+    {"id": "h1", "type": "circle", "label": "h1"},
+    {"id": "h2", "type": "circle", "label": "h2"},
+    {"id": "h3", "type": "circle", "label": "h3"},
+    {"id": "y",  "type": "box",    "label": "output"},
+    {"id": "hidden", "type": "group", "label": "hidden layer", "children": ["h1", "h2", "h3"]}
+  ],
+  "edges": [
+    {"from": "x",  "to": "h1"},
+    {"from": "x",  "to": "h2"},
+    {"from": "x",  "to": "h3"},
+    {"from": "h1", "to": "y"},
+    {"from": "h2", "to": "y"},
+    {"from": "h3", "to": "y"}
+  ]
+}

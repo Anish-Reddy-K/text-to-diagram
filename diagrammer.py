@@ -7,19 +7,25 @@ def render(spec):
         "row_gap": spec.get("row_gap", ROW_GAP),
         "margin": spec.get("margin", MARGIN),
     }
-    _apply_defaults(nodes)
-    if any("x" not in n or "y" not in n for n in nodes):
-        _auto_layout(nodes, edges, direction, gaps)
+
+    groups = [n for n in nodes if n["type"] == "group"]
+    non_groups = [n for n in nodes if n["type"] != "group"]
+    _apply_defaults(non_groups)
+    if any("x" not in n or "y" not in n for n in non_groups):
+        _auto_layout(non_groups, edges, direction, gaps)
     by_id = {n["id"]: n for n in nodes}
+    _compute_group_bounds(groups, by_id)
 
     width = spec.get("width") or _fit_width(nodes)
     height = spec.get("height") or _fit_height(nodes)
 
     router = spec.get("router", "straight")
     body = []
+    for g in groups:
+        body.append(_group(g))
     for edge in edges:
         body.append(_edge(edge, by_id, router, direction))
-    for node in nodes:
+    for node in non_groups:
         if node["type"] == "box":
             body.append(_box(node))
         elif node["type"] == "circle":
@@ -54,6 +60,44 @@ def _text(node):
         f'dominant-baseline="middle" font-family="monospace" '
         f'font-size="14">{label}</text>'
     )
+
+
+def _group(node):
+    x, y, w, h = node["x"], node["y"], node["w"], node["h"]
+    label = node.get("label", "")
+    rect = (
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" '
+        f'fill="none" stroke="black" stroke-width="1" '
+        f'stroke-dasharray="4,3"/>'
+    )
+    if not label:
+        return rect
+    text = (
+        f'<text x="{x + 8}" y="{y + 16}" text-anchor="start" '
+        f'dominant-baseline="middle" font-family="monospace" '
+        f'font-size="12">{label}</text>'
+    )
+    return rect + text
+
+
+def _compute_group_bounds(groups, by_id):
+    pad = 16
+    label_pad = 16
+    for g in groups:
+        children = [by_id[c] for c in g.get("children", []) if c in by_id]
+        if not children:
+            continue
+        gx = min(c["x"] for c in children) - pad
+        gy = min(c["y"] for c in children) - pad - label_pad
+        right = max(c["x"] + c["w"] for c in children) + pad
+        bottom = max(c["y"] + c["h"] for c in children) + pad
+        label_w = len(g.get("label", "")) * 7.2 + 16
+        if label_w > right - gx:
+            extra = label_w - (right - gx)
+            gx -= extra / 2
+            right += extra / 2
+        g["x"], g["y"] = gx, gy
+        g["w"], g["h"] = right - gx, bottom - gy
 
 
 def _stack(node):
