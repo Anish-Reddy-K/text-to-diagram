@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"id": "app", "type": "box", "label": "app"},
+    {"id": "db", "type": "database", "label": "users"},
+    {"id": "cache", "type": "database", "label": "cache"}
+  ],
+  "edges": [
+    {"from": "app", "to": "db", "label": "query"},
+    {"from": "app", "to": "cache", "label": "read"}
+  ]
+}

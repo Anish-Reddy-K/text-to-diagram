@@ -1,0 +1,13 @@
+{
+  "margin": 80,
+  "nodes": [
+    {"id": "a", "type": "box", "label": "start"},
+    {"id": "b", "type": "box", "label": "loop"},
+    {"id": "c", "type": "box", "label": "end"}
+  ],
+  "edges": [
+    {"from": "a", "to": "b"},
+    {"from": "b", "to": "b", "label": "retry"},
+    {"from": "b", "to": "c"}
+  ]
+}

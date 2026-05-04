@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"id": "a", "type": "box", "label": "client"},
+    {"id": "note", "type": "text", "label": "(retries on 5xx)"},
+    {"id": "b", "type": "box", "label": "server"}
+  ],
+  "edges": [
+    {"from": "a", "to": "note"},
+    {"from": "note", "to": "b"}
+  ]
+}

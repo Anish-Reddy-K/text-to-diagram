@@ -15,14 +15,19 @@ def render(spec):
     width = spec.get("width") or _fit_width(nodes)
     height = spec.get("height") or _fit_height(nodes)
 
+    router = spec.get("router", "straight")
     body = []
     for node in nodes:
         if node["type"] == "box":
             body.append(_box(node))
         elif node["type"] == "circle":
             body.append(_circle(node))
+        elif node["type"] == "text":
+            body.append(_text(node))
+        elif node["type"] == "database":
+            body.append(_database(node))
     for edge in edges:
-        body.append(_edge(edge, by_id))
+        body.append(_edge(edge, by_id, router, direction))
     return _svg(width, height, body)
 
 
@@ -39,6 +44,37 @@ def _box(node):
     )
 
 
+def _text(node):
+    cx, cy = _center(node)
+    label = node.get("label", "")
+    return (
+        f'<text x="{cx}" y="{cy}" text-anchor="middle" '
+        f'dominant-baseline="middle" font-family="monospace" '
+        f'font-size="14">{label}</text>'
+    )
+
+
+def _database(node):
+    x, y, w, h = node["x"], node["y"], node["w"], node["h"]
+    label = node.get("label", "")
+    cx, cy = x + w / 2, y + h / 2
+    rx, ry = w / 2, 8
+    style = 'fill="none" stroke="black" stroke-width="1.5"'
+    top = f'<ellipse cx="{cx}" cy="{y + ry}" rx="{rx}" ry="{ry}" {style}/>'
+    left = f'<line x1="{x}" y1="{y + ry}" x2="{x}" y2="{y + h - ry}" {style}/>'
+    right = f'<line x1="{x + w}" y1="{y + ry}" x2="{x + w}" y2="{y + h - ry}" {style}/>'
+    bottom = (
+        f'<path d="M {x} {y + h - ry} A {rx} {ry} 0 0 0 {x + w} {y + h - ry}" '
+        f'fill="none" stroke="black" stroke-width="1.5"/>'
+    )
+    text = (
+        f'<text x="{cx}" y="{cy}" text-anchor="middle" '
+        f'dominant-baseline="middle" font-family="monospace" '
+        f'font-size="14">{label}</text>'
+    )
+    return top + left + right + bottom + text
+
+
 def _circle(node):
     cx, cy = _center(node)
     r = node["w"] / 2
@@ -52,18 +88,25 @@ def _circle(node):
     )
 
 
-def _edge(edge, by_id):
+def _edge(edge, by_id, router, direction):
     a = by_id[edge["from"]]
     b = by_id[edge["to"]]
-    x1, y1 = _border_point(a, _center(b))
-    x2, y2 = _border_point(b, _center(a))
     stroke_w = 3 if edge.get("weight") == "thick" else 1.5
     dash = ' stroke-dasharray="6,4"' if edge.get("style") == "dashed" else ""
-    line = (
-        f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" '
-        f'stroke="black" stroke-width="{stroke_w}"{dash} '
-        f'marker-end="url(#arrow)"/>'
-    )
+
+    if edge["from"] == edge["to"]:
+        return _self_loop(a, stroke_w, dash, edge.get("label"))
+
+    if router == "ortho":
+        line, x1, y1, x2, y2 = _ortho_edge(a, b, stroke_w, dash, direction)
+    else:
+        x1, y1 = _border_point(a, _center(b))
+        x2, y2 = _border_point(b, _center(a))
+        line = (
+            f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" '
+            f'stroke="black" stroke-width="{stroke_w}"{dash} '
+            f'marker-end="url(#arrow)"/>'
+        )
     label = edge.get("label")
     if not label:
         return line
@@ -82,6 +125,59 @@ def _edge(edge, by_id):
         f'font-size="12">{label}</text>'
     )
     return line + bg + text
+
+
+def _ortho_edge(a, b, stroke_w, dash, direction):
+    ax, ay = _center(a)
+    bx, by = _center(b)
+    horiz = direction == "LR"
+    bias = 0.3  # bend at 30% from source so 70% is straight approach into target
+    if horiz:
+        x1 = a["x"] + a["w"] if bx > ax else a["x"]
+        y1 = ay
+        x2 = b["x"] if bx > ax else b["x"] + b["w"]
+        y2 = by
+        mid = x1 + (x2 - x1) * bias
+        d = f"M {x1} {y1} L {mid} {y1} L {mid} {y2} L {x2} {y2}"
+    else:
+        x1 = ax
+        y1 = a["y"] + a["h"] if by > ay else a["y"]
+        x2 = bx
+        y2 = b["y"] if by > ay else b["y"] + b["h"]
+        mid = y1 + (y2 - y1) * bias
+        d = f"M {x1} {y1} L {x1} {mid} L {x2} {mid} L {x2} {y2}"
+    line = (
+        f'<path d="{d}" fill="none" stroke="black" '
+        f'stroke-width="{stroke_w}"{dash} marker-end="url(#arrow)"/>'
+    )
+    return line, x1, y1, x2, y2
+
+
+def _self_loop(node, stroke_w, dash, label):
+    cx, _ = _center(node)
+    top = node["y"]
+    p1x, p2x = cx - node["w"] * 0.15, cx + node["w"] * 0.15
+    cy = top - 45
+    path = (
+        f'<path d="M {p1x} {top} C {p1x} {cy}, {p2x} {cy}, {p2x} {top}" '
+        f'fill="none" stroke="black" stroke-width="{stroke_w}"{dash} '
+        f'marker-end="url(#arrow)"/>'
+    )
+    if not label:
+        return path
+    rect_w = len(label) * 7.2 + 8
+    rect_h = 16
+    ly = cy - 4
+    bg = (
+        f'<rect x="{cx - rect_w / 2}" y="{ly - rect_h / 2}" '
+        f'width="{rect_w}" height="{rect_h}" fill="white" stroke="none"/>'
+    )
+    text = (
+        f'<text x="{cx}" y="{ly}" text-anchor="middle" '
+        f'dominant-baseline="middle" font-family="monospace" '
+        f'font-size="12">{label}</text>'
+    )
+    return path + bg + text
 
 
 def _center(node):
@@ -120,6 +216,12 @@ def _apply_defaults(nodes):
                 n.setdefault("h", n["r"] * 2)
             n.setdefault("w", 50)
             n.setdefault("h", 50)
+        elif n["type"] == "text":
+            n.setdefault("w", len(n.get("label", "")) * 8 + 16)
+            n.setdefault("h", 24)
+        elif n["type"] == "database":
+            n.setdefault("w", 80)
+            n.setdefault("h", 80)
         else:
             n.setdefault("w", DEFAULT_W)
             n.setdefault("h", DEFAULT_H)
@@ -179,7 +281,8 @@ def _compute_depths(nodes, edges):
     ids = [n["id"] for n in nodes]
     incoming = {i: [] for i in ids}
     for e in edges:
-        incoming[e["to"]].append(e["from"])
+        if e["from"] != e["to"]:
+            incoming[e["to"]].append(e["from"])
     depth = {}
 
     def d(i, seen=()):
