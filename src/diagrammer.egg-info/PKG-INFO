@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: diagrammer
+Version: 0.1.0
+Summary: Turn a JSON spec into a clean blueprint-style SVG diagram.
+Requires-Python: >=3.8

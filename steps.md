@@ -13,11 +13,13 @@
 
 **Stack.** Python 3, stdlib only. No build step, no `pip install` (until packaging in Phase 9). Tests use `unittest` (stdlib). The three eventual distribution interfaces (Claude Skill, MCP server, interactive CLI) are all thin wrappers over a single function: `render(spec) -> svg_string`.
 
-**Current state.** Phases 0–4 (steps 1–20) are done. `diagrammer.py` exports `render(spec)` and `register_component(name, fn, default_w, default_h)`. Built-in node types: `box`, `circle`, `text`, `database`, `stack`, `group`, `note`, `custom`. Edges support labels (with auto-widened column gaps for breathing room), `style` (dashed/solid), `weight` (thin/thick), self-loops, and `router: "ortho"` for right-angle bends. Layout supports `direction` (LR/TB), per-spec `col_gap`/`row_gap`/`margin`, vertical centering of columns, and a 30%-from-source bend bias for ortho. Spec accepts a top-level `defs` string for shared SVG defs (gradients, custom markers, filters) referenced from `custom` nodes. Edges are drawn behind nodes so stacks visually emerge from behind their back layers. CLI reads JSON from a path or stdin.
+**Current state.** Phases 0–7 (steps 1–25) are done. The package lives at `src/diagrammer/__init__.py` and exports `render(spec)`, `validate(spec)`, `register_component(name, fn, default_w, default_h)`, and `cli()`. Installed via `pip install -e .`; the `diagrammer` console script and `python -m diagrammer` both work. `diagrammer prompt` prints the LLM-facing spec doc (`src/diagrammer/prompt.md`). Built-in node types: `box`, `circle`, `text`, `database`, `stack`, `group`, `note`, `custom`. Edges support labels (with auto-widened column gaps for breathing room), `style` (dashed/solid), `weight` (thin/thick), self-loops, and `router: "ortho"` for right-angle bends. Layout supports `direction` (LR/TB), per-spec `col_gap`/`row_gap`/`margin`, vertical centering of columns, and a 30%-from-source bend bias for ortho. Spec accepts a top-level `defs` string for shared SVG defs (gradients, custom markers, filters) referenced from `custom` nodes. Edges are drawn behind nodes so stacks visually emerge from behind their back layers. CLI reads JSON from a path or stdin.
 
 **Layout.**
 ```
-diagrammer.py        # the library + CLI entry point
+src/diagrammer/      # the library + CLI (__init__.py, __main__.py, prompt.md)
+pyproject.toml       # packaging
+tests/               # unittest snapshots, one per built-in component
 CLAUDE.md            # behavioral guidelines
 steps.md             # this file
 test_registry.py     # demo of register_component (Python API)
@@ -25,7 +27,7 @@ examples/            # JSON specs the CLI reads (mlp, ortho, transformer, groupe
 scratch/             # early phase-0 verification scripts (test1–4); kept for reference
 ```
 
-To run an example: `python3 diagrammer.py examples/mlp.json > out.svg && open out.svg`.
+To run an example: `diagrammer examples/mlp.json > out.svg && open out.svg`.
 
 **Working agreement.** Each step below is small enough to finish in one sitting and ends with a verifiable check. Don't skip ahead. Don't bundle. If a step takes more than ~30 min, it's too big — split it. After each step, the user runs the verify command and either says "pass" (move to next) or reports what's wrong (fix, then re-verify).
 
@@ -86,7 +88,7 @@ The escape hatch when the core set isn't enough. The LLM writes SVG fragments in
 
 ## Phase 7 — Packaging
 
-- [ ] **25.** Move `diagrammer.py` into `src/diagrammer/__init__.py`. Add `pyproject.toml` with `[project.scripts] diagrammer = "diagrammer:cli"`. Verify: `pip install -e .` then `diagrammer mlp.json > out.svg` works from any directory.
+- [x] **25.** Move `diagrammer.py` into `src/diagrammer/__init__.py`. Add `pyproject.toml` with `[project.scripts] diagrammer = "diagrammer:cli"`. Verify: `pip install -e .` then `diagrammer mlp.json > out.svg` works from any directory.
 - [ ] **26.** Add `README.md`: install, 30-second example, spec reference, prompt link, custom components.
 - [ ] **27.** Add `LICENSE` (MIT).
 
