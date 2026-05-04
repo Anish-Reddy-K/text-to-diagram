@@ -25,6 +25,7 @@ Issues = "https://github.com/Anish-Reddy-K/diagrammer/issues"
 
 [project.scripts]
 diagrammer = "diagrammer:cli"
+diagrammer-mcp = "diagrammer.mcp_server:main"
 
 [project.optional-dependencies]
 mcp = ["mcp"]

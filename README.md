@@ -2,13 +2,13 @@
 
 Ask your coding agent for a clean technical diagram. Get back an SVG you can drop into a README, blog post, design doc, or slide.
 
-`diagrammer` is a small Python renderer plus a Claude Code skill. The skill lets Claude turn plain-English diagram requests into a JSON spec, render that spec with the CLI, and hand you the finished SVG.
+`diagrammer` is a small Python renderer, a Claude Code skill, and an MCP server. The main workflow is simple: install the skill, ask for a diagram in plain English, and let the agent generate the SVG.
 
 ![LLM inference pipeline](https://raw.githubusercontent.com/Anish-Reddy-K/diagrammer/master/docs/img/hero.png)
 
-## Use It From Claude Code
+## Quick Start: Claude Code
 
-Install the CLI:
+Install the renderer:
 
 ```bash
 pipx install diagrammer
@@ -28,6 +28,62 @@ Draw an SVG diagram of a request flow: browser -> API -> Postgres -> response.
 ```
 
 Claude writes the spec, runs `diagrammer`, and gives you an SVG file.
+
+## Ways To Use It
+
+### Claude Code Skill
+
+This is the recommended path. The skill teaches Claude when to use `diagrammer`, how to write the JSON spec, and how to render the SVG.
+
+```text
+/plugin marketplace add Anish-Reddy-K/diagrammer
+/plugin install diagrammer@diagrammer-tools
+```
+
+After that, ask naturally:
+
+```text
+Make a clean SVG diagram of my auth flow: browser, API, session store, Postgres.
+```
+
+### Codex And Other Coding Agents
+
+Codex does not use Claude Code skills. Use the CLI directly and give Codex the diagram format when needed:
+
+```bash
+pipx install diagrammer
+diagrammer prompt
+```
+
+Then ask Codex to create a JSON spec and render it:
+
+```text
+Create a diagrammer spec for this service flow and run diagrammer to save it as docs/auth-flow.svg.
+```
+
+The useful pattern is: agent writes `spec.json`, agent runs `diagrammer spec.json > diagram.svg`, you keep the SVG.
+
+### MCP Server
+
+For MCP-compatible clients, `diagrammer` also ships an MCP server exposing one tool:
+
+```text
+render_diagram(spec) -> svg_string
+```
+
+Install from GitHub with the MCP extra:
+
+```bash
+pipx install "diagrammer[mcp] @ git+https://github.com/Anish-Reddy-K/diagrammer.git"
+```
+
+Then point your MCP client at:
+
+```bash
+diagrammer-mcp
+```
+
+Use the MCP path when you want the client to call a diagram-rendering tool directly instead of shelling out to the CLI.
 
 ## What It Is For
 
@@ -73,24 +129,6 @@ Render it:
 ```bash
 diagrammer spec.json > diagram.svg
 ```
-
-## Using Other Agents
-
-The Claude Code skill is the easiest path because it tells Claude exactly when and how to use the renderer.
-
-In Codex or another coding agent, use the CLI directly. Ask the agent to create a diagram spec and run:
-
-```bash
-diagrammer path/to/spec.json > diagram.svg
-```
-
-For better results, give the agent the built-in guide:
-
-```bash
-diagrammer prompt
-```
-
-That prints the JSON format and examples the agent should follow.
 
 ## Examples
 
