@@ -94,3 +94,7 @@ The plan is the durable memory of the project. A fresh LLM with zero context sho
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying questions come before implementation rather than after mistakes, and a new contributor (human or LLM) can pick up the project from `steps.md` alone.
+
+
+Glossary:
+- lg = looks good, go to next step

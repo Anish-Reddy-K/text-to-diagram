@@ -1,9 +1,15 @@
 def render(spec):
     nodes = spec.get("nodes", [])
     edges = spec.get("edges", [])
+    direction = spec.get("direction", "LR")
+    gaps = {
+        "col_gap": spec.get("col_gap", COL_GAP),
+        "row_gap": spec.get("row_gap", ROW_GAP),
+        "margin": spec.get("margin", MARGIN),
+    }
     _apply_defaults(nodes)
     if any("x" not in n or "y" not in n for n in nodes):
-        _auto_layout(nodes, edges)
+        _auto_layout(nodes, edges, direction, gaps)
     by_id = {n["id"]: n for n in nodes}
 
     width = spec.get("width") or _fit_width(nodes)
@@ -51,11 +57,29 @@ def _edge(edge, by_id):
     b = by_id[edge["to"]]
     x1, y1 = _border_point(a, _center(b))
     x2, y2 = _border_point(b, _center(a))
-    return (
+    line = (
         f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" '
         f'stroke="black" stroke-width="1.5" '
         f'marker-end="url(#arrow)"/>'
     )
+    label = edge.get("label")
+    if not label:
+        return line
+    mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+    pad = 4
+    char_w = 7.2
+    rect_w = len(label) * char_w + pad * 2
+    rect_h = 16
+    bg = (
+        f'<rect x="{mx - rect_w / 2}" y="{my - rect_h / 2}" '
+        f'width="{rect_w}" height="{rect_h}" fill="white" stroke="none"/>'
+    )
+    text = (
+        f'<text x="{mx}" y="{my}" text-anchor="middle" '
+        f'dominant-baseline="middle" font-family="monospace" '
+        f'font-size="12">{label}</text>'
+    )
+    return line + bg + text
 
 
 def _center(node):
@@ -99,27 +123,42 @@ def _apply_defaults(nodes):
             n.setdefault("h", DEFAULT_H)
 
 
-def _auto_layout(nodes, edges):
+def _auto_layout(nodes, edges, direction, gaps):
     depth = _compute_depths(nodes, edges)
     cols = {}
     for n in nodes:
         cols.setdefault(depth[n["id"]], []).append(n)
 
-    col_widths = {c: max(n["w"] for n in ns) for c, ns in cols.items()}
-    x_of = {}
-    cursor = MARGIN
+    margin = gaps["margin"]
+    # primary axis = depth direction; secondary axis = stacking within a column
+    if direction == "TB":
+        prim, sec = "h", "w"
+        prim_xy, sec_xy = "y", "x"
+        prim_gap, sec_gap = gaps["row_gap"], gaps["col_gap"]
+    else:  # LR
+        prim, sec = "w", "h"
+        prim_xy, sec_xy = "x", "y"
+        prim_gap, sec_gap = gaps["col_gap"], gaps["row_gap"]
+
+    col_prim = {c: max(n[prim] for n in ns) for c, ns in cols.items()}
+    prim_of = {}
+    cursor = margin
     for c in sorted(cols):
-        x_of[c] = cursor
-        cursor += col_widths[c] + COL_GAP
+        prim_of[c] = cursor
+        cursor += col_prim[c] + prim_gap
+
+    col_sec = {
+        c: sum(n[sec] for n in ns) + sec_gap * (len(ns) - 1)
+        for c, ns in cols.items()
+    }
+    tallest = max(col_sec.values())
 
     for c, ns in cols.items():
-        col_h = sum(n["h"] for n in ns) + ROW_GAP * (len(ns) - 1)
-        y = MARGIN
+        s = margin + (tallest - col_sec[c]) / 2
         for n in ns:
-            n["x"] = x_of[c] + (col_widths[c] - n["w"]) / 2
-            n["y"] = y
-            y += n["h"] + ROW_GAP
-        _ = col_h
+            n[prim_xy] = prim_of[c] + (col_prim[c] - n[prim]) / 2
+            n[sec_xy] = s
+            s += n[sec] + sec_gap
 
 
 def _compute_depths(nodes, edges):

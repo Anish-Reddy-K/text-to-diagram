@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"id": "a", "type": "box", "label": "client"},
+    {"id": "b", "type": "box", "label": "server"},
+    {"id": "c", "type": "box", "label": "db"}
+  ],
+  "edges": [
+    {"from": "a", "to": "b", "label": "request"},
+    {"from": "b", "to": "c", "label": "query"}
+  ]
+}
