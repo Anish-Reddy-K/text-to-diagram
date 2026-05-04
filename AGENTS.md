@@ -60,40 +60,9 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Persistent Build Plan (`steps.md`)
-
-**Every non-trivial project gets a `steps.md` at the root. Maintain it across sessions.**
-
-The plan is the durable memory of the project. A fresh LLM with zero context should be able to read `steps.md` and continue the work without asking what we're building, why, or how.
-
-**Structure of `steps.md`:**
-
-1. **Context block at the top** — short paragraph(s) covering:
-   - *What we're building* (the product, the user, the workflow).
-   - *Design philosophy* (the non-negotiables — stack constraints, what's deliberately excluded, style rules).
-   - *Stack* (languages, deps allowed/forbidden, build tooling — or lack thereof).
-   - *Current state* (what's done, where the entry point lives, where examples live).
-   - *Working agreement* (the loop: small step → verify → pass or fix).
-
-2. **Phased step list** — flat checkboxes, grouped by phase. Each step is:
-   - Small enough to finish in one sitting (~30 min). If bigger, split it.
-   - Ends with a concrete verify command or visual check.
-   - Phrased as one outcome, not a bundle. "Add edge labels" is a step; "Add edge labels and improve layout" is two.
-
-3. **Definition of done** — one sentence describing the v1 end state, so the trajectory is obvious.
-
-**Working the plan:**
-- Before starting work, re-read the context block. Don't drift from the philosophy.
-- Do one step at a time. Implement → tell the user how to test → wait for pass/fail → fix or move on.
-- Mark steps `[x]` as they pass. Update the context block's "current state" line when a phase completes.
-- New ideas mid-project go *into the plan as new steps*, not into the current step. Don't bundle scope.
-- If the plan becomes wrong (architectural pivot, scrapped feature), edit the plan first — then code.
-
-**The plan file is part of the deliverable.** Treat edits to it with the same care as code: surgical, intentional, no speculative steps.
-
 ---
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying questions come before implementation rather than after mistakes, and a new contributor (human or LLM) can pick up the project from `steps.md` alone.
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
 
 Glossary:
