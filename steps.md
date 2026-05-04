@@ -13,7 +13,7 @@
 
 **Stack.** Python 3, stdlib only. No build step, no `pip install` (until packaging in Phase 9). Tests use `unittest` (stdlib). The three eventual distribution interfaces (Claude Skill, MCP server, interactive CLI) are all thin wrappers over a single function: `render(spec) -> svg_string`.
 
-**Current state.** Phases 0–7 (steps 1–25) are done. The package lives at `src/diagrammer/__init__.py` and exports `render(spec)`, `validate(spec)`, `register_component(name, fn, default_w, default_h)`, and `cli()`. Installed via `pip install -e .`; the `diagrammer` console script and `python -m diagrammer` both work. `diagrammer prompt` prints the LLM-facing spec doc (`src/diagrammer/prompt.md`). Built-in node types: `box`, `circle`, `text`, `database`, `stack`, `group`, `note`, `custom`. Edges support labels (with auto-widened column gaps for breathing room), `style` (dashed/solid), `weight` (thin/thick), self-loops, and `router: "ortho"` for right-angle bends. Layout supports `direction` (LR/TB), per-spec `col_gap`/`row_gap`/`margin`, vertical centering of columns, and a 30%-from-source bend bias for ortho. Spec accepts a top-level `defs` string for shared SVG defs (gradients, custom markers, filters) referenced from `custom` nodes. Edges are drawn behind nodes so stacks visually emerge from behind their back layers. CLI reads JSON from a path or stdin.
+**Current state.** Phases 0–8 (steps 1–29) are done. The package lives at `src/diagrammer/__init__.py` and exports `render(spec)`, `validate(spec)`, `register_component(name, fn, default_w, default_h)`, and `cli()`. Installed via `pip install -e .`; the `diagrammer` console script and `python -m diagrammer` both work. `diagrammer prompt` prints the LLM-facing spec doc (`src/diagrammer/prompt.md`). Distribution: a Claude Skill at `skill/SKILL.md` and an MCP server at `mcp_server.py` (optional `[mcp]` extra) — both verified end-to-end against Claude Code and Claude Desktop respectively. Built-in node types: `box`, `circle`, `text`, `database`, `stack`, `group`, `note`, `custom`. Edges support labels (with auto-widened column gaps for breathing room), `style` (dashed/solid), `weight` (thin/thick), self-loops, and `router: "ortho"` for right-angle bends. Layout supports `direction` (LR/TB), per-spec `col_gap`/`row_gap`/`margin`, vertical centering of columns, and a 30%-from-source bend bias for ortho. Spec accepts a top-level `defs` string for shared SVG defs (gradients, custom markers, filters) referenced from `custom` nodes. Edges are drawn behind nodes so stacks visually emerge from behind their back layers. CLI reads JSON from a path or stdin.
 
 **Layout.**
 ```
@@ -22,7 +22,7 @@ pyproject.toml       # packaging
 tests/               # unittest snapshots, one per built-in component
 CLAUDE.md            # behavioral guidelines
 steps.md             # this file
-test_registry.py     # demo of register_component (Python API)
+registry_demo.py     # demo of register_component (Python API)
 examples/            # JSON specs the CLI reads (mlp, ortho, transformer, grouped, note, custom, defs, …)
 scratch/             # early phase-0 verification scripts (test1–4); kept for reference
 ```
@@ -97,17 +97,43 @@ The escape hatch when the core set isn't enough. The LLM writes SVG fragments in
 Each interface is a thin wrapper over `render()`. Don't duplicate logic.
 
 - [x] **28.** **Claude Skill.** Create `skill/SKILL.md` describing what it does and when to invoke. Skill body shells out to `python -m diagrammer`. Verify: install locally, ask Claude to draw something, SVG appears.
-- [ ] **29.** **MCP server.** `mcp_server.py` using the official Python MCP SDK. Exposes one tool: `render_diagram(spec) -> svg_string`. Verify: configure in Claude Desktop, ask for a diagram, server returns SVG.
+- [x] **29.** **MCP server.** `mcp_server.py` using the official Python MCP SDK. Exposes one tool: `render_diagram(spec) -> svg_string`. Verify: configure in Claude Desktop, ask for a diagram, server returns SVG.
 
 ## Phase 9 — Publish
 
-- [ ] **30.** Push to GitHub. CI: GitHub Action runs `python -m unittest` on push.
-- [ ] **31.** Build wheel + sdist; `twine upload` to PyPI; tag `v0.1.0` and draft GitHub release. Verify: fresh machine `pipx install diagrammer` works.
-- [ ] **32.** Write the launch blog post — *use the tool itself for every diagram in the post.* Verify: post ships with embedded SVGs from the library, end-to-end loop proven on a real workload.
+The end-to-end goal of this phase: a stranger on the internet runs *two commands* and has the diagrammer skill working in Claude Code, and `pipx install diagrammer` puts the CLI on their PATH. Everything in this phase serves that.
+
+**Pre-flight cleanup**
+
+- [ ] **30.** Repo cleanup so `python -m unittest` (no args, from root) passes and tracked files are intentional. Concretely: rename `test_registry.py` → `registry_demo.py` so unittest discovery doesn't pick it up; delete the stray `out.svg`; untrack `src/diagrammer.egg-info/`; expand `.gitignore` with `.venv/`, `*.egg-info/`, `out.svg`. Verify: `python -m unittest` passes from repo root; `git ls-files` shows no build artifacts or stray SVGs.
+
+**Plugin marketplace (Claude Code distribution)**
+
+- [ ] **31.** Wrap the existing `skill/SKILL.md` as a Claude Code plugin marketplace inside this same repo: add `.claude-plugin/marketplace.json` and `plugins/diagrammer/.claude-plugin/plugin.json`, and move/symlink the SKILL.md into `plugins/diagrammer/skills/diagrammer/SKILL.md`. Marketplace name: `diagrammer-tools`, plugin name: `diagrammer`. Verify locally: `/plugin marketplace add /path/to/repo` then `/plugin install diagrammer@diagrammer-tools` in Claude Code; ask Claude to draw something; SVG appears.
+
+**GitHub + CI**
+
+- [ ] **32.** Push to GitHub (public repo). Add `.github/workflows/test.yml` running `python -m unittest` on push + PR. Verify: green check on the latest commit on `master`.
+
+**PyPI**
+
+- [ ] **33.** Build wheel + sdist (`python -m build`), upload to PyPI with `twine`, tag `v0.1.0`, draft a GitHub release with the SVG of an example diagram embedded in the release notes. Verify: in a fresh shell / clean venv, `pipx install diagrammer` then `diagrammer examples/mlp.json > out.svg` works.
+
+**End-to-end verification (the real test)**
+
+- [ ] **34.** Full cold-start loop on a clean machine (or fresh user account): (a) `pipx install diagrammer`, (b) in Claude Code, `/plugin marketplace add <user>/<repo>` + `/plugin install diagrammer@diagrammer-tools`, (c) ask Claude to draw a non-trivial diagram (transformer block, request flow), (d) confirm the SVG renders correctly when opened. Verify: zero manual fixes between install and a usable SVG. If anything breaks, fix and re-cut a patch release before promoting.
+
+**Promotion**
+
+- [ ] **35.** README polish for first impressions: install line at the very top (both `pipx install diagrammer` and the `/plugin install` command), an embedded example SVG (rendered by the tool itself), a 30-second "what is this" paragraph, and a link to `prompt.md`. Verify: a cold reader of the README knows what this is and how to install in <30s.
+- [ ] **36.** LinkedIn launch post. Lead with a generated SVG (use the tool to make it), one-paragraph pitch (LLM-first spec → blueprint SVG, no design tool), link to GitHub. Verify: post is live; the embedded image was produced by the tool itself.
+- [ ] **37.** Submit to third-party Claude skill directories for discoverability: claudemarketplaces.com, skillsmp.com, claudeskills.info, and a PR to the Claude Code Templates community repo. Verify: at least two of these list the skill with a working install command.
 
 ## Phase 10 — Beyond
 
 Add steps here only when real use demands them. No speculative roadmap.
+
+- [ ] **38.** Launch blog post — *use the tool itself for every diagram in the post.* Verify: post ships with embedded SVGs from the library, end-to-end loop proven on a real workload.
 
 ---
 
