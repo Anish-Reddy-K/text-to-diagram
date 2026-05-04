@@ -1,0 +1,13 @@
+{
+  "nodes": [
+    {"id": "a", "type": "box", "label": "a"},
+    {"id": "b", "type": "box", "label": "b"},
+    {"id": "c", "type": "box", "label": "c"},
+    {"id": "d", "type": "box", "label": "d"}
+  ],
+  "edges": [
+    {"from": "a", "to": "b", "label": "default"},
+    {"from": "b", "to": "c", "label": "dashed", "style": "dashed"},
+    {"from": "c", "to": "d", "label": "thick", "weight": "thick"}
+  ]
+}

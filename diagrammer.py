@@ -57,9 +57,11 @@ def _edge(edge, by_id):
     b = by_id[edge["to"]]
     x1, y1 = _border_point(a, _center(b))
     x2, y2 = _border_point(b, _center(a))
+    stroke_w = 3 if edge.get("weight") == "thick" else 1.5
+    dash = ' stroke-dasharray="6,4"' if edge.get("style") == "dashed" else ""
     line = (
         f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" '
-        f'stroke="black" stroke-width="1.5" '
+        f'stroke="black" stroke-width="{stroke_w}"{dash} '
         f'marker-end="url(#arrow)"/>'
     )
     label = edge.get("label")
@@ -140,12 +142,24 @@ def _auto_layout(nodes, edges, direction, gaps):
         prim_xy, sec_xy = "x", "y"
         prim_gap, sec_gap = gaps["col_gap"], gaps["row_gap"]
 
+    # widen gaps between adjacent columns to fit edge labels with breathing room
+    label_gap = {}
+    if direction == "LR":
+        for e in edges:
+            if "label" not in e:
+                continue
+            src_d, dst_d = depth[e["from"]], depth[e["to"]]
+            if dst_d - src_d == 1:
+                needed = len(e["label"]) * 7.2 + 8 + 80  # text + bg pad + breathing
+                label_gap[src_d] = max(label_gap.get(src_d, 0), needed)
+
     col_prim = {c: max(n[prim] for n in ns) for c, ns in cols.items()}
     prim_of = {}
     cursor = margin
     for c in sorted(cols):
         prim_of[c] = cursor
-        cursor += col_prim[c] + prim_gap
+        gap_after = max(prim_gap, label_gap.get(c, 0))
+        cursor += col_prim[c] + gap_after
 
     col_sec = {
         c: sum(n[sec] for n in ns) + sec_gap * (len(ns) - 1)
